@@ -1,216 +1,237 @@
  <div align="center">
 
-<img src="https://img.shields.io/badge/DEEP%20PACKET%20ANALYZER-NETWORK%20INTELLIGENCE-00D9FF?style=for-the-badge&labelColor=07111F" alt="Deep Packet Analyzer Network Intelligence"/>
-
-<br/>
-
-# ⌬ DEEP PACKET ANALYZER
+# ⬡ DEEP PACKET ANALYZER
 
 ### `PACKET IN. INSIGHT OUT.`
 
 **Offline Network Traffic Analysis · Deep Packet Inspection · Rule-Based Filtering**
 
-<br/>
-
-<img src="https://img.shields.io/badge/LANGUAGE-Python%203.10%2B-3776AB?style=flat-square&logo=python&logoColor=white" alt="Python 3.10+"/>
-<img src="https://img.shields.io/badge/INPUT-Classic%20PCAP-00B8A9?style=flat-square" alt="Classic PCAP"/>
-<img src="https://img.shields.io/badge/MODE-Offline%20Analysis-7C83FD?style=flat-square" alt="Offline Analysis"/>
-
-<br/><br/>
+`PYTHON 3.10+` · `CLASSIC PCAP` · `NETWORK SECURITY`
 
 ```text
-   CAPTURE  ──►  DECODE  ──►  CLASSIFY  ──►  FILTER
-      │             │            │             │
-    PCAP         Protocols      Flows        Rules
+┌─────────────────────────────────────────────────────────┐
+│                 NETWORK ANALYSIS ENGINE                 │
+├─────────────────────────────────────────────────────────┤
+│                                                         │
+│   PCAP INPUT ──► PACKET PARSER ──► METADATA EXTRACTION  │
+│                                         │               │
+│                                         ▼               │
+│                                    FLOW TRACKER         │
+│                                         │               │
+│                                         ▼               │
+│                                   RULE ENGINE           │
+│                                    /        \           │
+│                                   ▼          ▼          │
+│                              PERMIT FLOW  BLOCK FLOW    │
+│                                   │                     │
+│                                   ▼                     │
+│                              OUTPUT PCAP                │
+│                                                         │
+└─────────────────────────────────────────────────────────┘
 ```
 
 </div>
 
 ---
 
-## About the Project
+## 01. Overview
 
-Deep Packet Analyzer is a modular Python application for inspecting Ethernet packet captures, parsing network protocols, tracking directional flows, extracting available application-layer metadata, and filtering traffic using configurable rules.
+Deep Packet Analyzer is a modular Python application designed to inspect offline Ethernet packet captures, parse network protocols, track directional network flows, extract available application-layer metadata, and filter traffic using configurable rules.
 
-It processes existing PCAP files without opening live capture interfaces or transmitting packets.
+The project implements a packet-processing pipeline with a custom PCAP reader, protocol parser, metadata extractor, flow tracker, rule manager, and optional multithreaded processing.
 
+It is intended for network diagnostics, protocol analysis, cybersecurity learning, and experimentation with network traffic processing.
 
-**Inspect. Decode. Analyze.**
+**Operating mode:** Passive offline analysis. The application processes existing capture files without opening live capture interfaces or transmitting packets.
 
-A Python-based engine for offline packet inspection, network flow tracking, protocol metadata extraction, and rule-based traffic filtering.
+## 02. Key Capabilities
 
----
+| Capability | Implementation |
+|---|---|
+| PCAP processing | Classic PCAP reading and writing |
+| Packet parsing | Ethernet II, VLAN, IPv4, IPv6, TCP and UDP |
+| Metadata extraction | TLS SNI, HTTP Host and DNS question names when visible |
+| Flow tracking | Directional five-tuples, packet counters and byte counters |
+| Application classification | Hostname-based application signatures |
+| Traffic filtering | IP, application, domain, substring and destination-port rules |
+| Concurrent processing | Configurable workers and bounded queues |
+| Reporting | Packet inspection and filtering statistics |
+| Testing | Automated tests for parsing, PCAP handling and filtering |
 
-`PYTHON` · `PCAP` · `DEEP PACKET INSPECTION` · `NETWORK SECURITY`
+## 03. System Architecture
 
-</div>
-# Deep Packet Analyzer
-
-**Offline PCAP Analysis, Deep Packet Inspection, and Rule-Based Network Traffic Filtering**
-
-Deep Packet Analyzer is a Python application for inspecting Ethernet packet captures, parsing network protocols, tracking directional flows, extracting available application-layer metadata, and applying configurable traffic-filtering rules.
-
-The project implements a modular packet-processing pipeline using Python's standard library. It focuses on structured packet parsing, bounded processing queues, flow tracking, and preservation of captured packet bytes.
-
-## 1. Problem Statement
-
-Network packet captures contain information at multiple protocol layers. Manually inspecting individual packets makes it difficult to understand traffic patterns, identify application protocols, track connections, and apply consistent filtering rules.
-
-Deep Packet Analyzer addresses this by providing a reusable offline analysis pipeline that reads PCAP files, parses packet headers, extracts selected protocol metadata, evaluates filtering rules, and reports processing statistics.
-
-## 2. System Architecture
-
-The analyzer is organized into the following processing stages:
+The application separates packet processing into modules to make individual components easier to maintain, test, and extend.
 
 ```text
-             Input PCAP File
-                    |
-                    v
-               PCAP Reader
-                    |
-                    v
-              Packet Parser
-                    |
-                    v
-          Protocol Metadata Extraction
-                    |
-                    v
-             Flow Classification
-                    |
-                    v
-              Rule Evaluation
-                    |
-             +------+------+
-             |             |
-             v             v
-        Permitted        Blocked
-          Packets        Packets
-             |
-             v
-       Output PCAP File
-
-       Processing Statistics
+              ┌───────────────────┐
+              │   Input PCAP      │
+              └─────────┬─────────┘
+                        │
+                        ▼
+              ┌───────────────────┐
+              │    PCAP Reader    │
+              └─────────┬─────────┘
+                        │
+                        ▼
+              ┌───────────────────┐
+              │   Packet Parser   │
+              └─────────┬─────────┘
+                        │
+                        ▼
+              ┌───────────────────┐
+              │ Metadata Extractor│
+              └─────────┬─────────┘
+                        │
+                        ▼
+              ┌───────────────────┐
+              │   Flow Tracking   │
+              └─────────┬─────────┘
+                        │
+                        ▼
+              ┌───────────────────┐
+              │   Rule Manager    │
+              └─────────┬─────────┘
+                        │
+                        ▼
+              ┌───────────────────┐
+              │ Filtering / Output│
+              └───────────────────┘
 ```
 
-The diagram represents the logical workflow. Exact execution order and filtering behavior depend on the selected CLI mode and implementation.
+This is a logical overview. The exact execution sequence can differ between inspection and filtering modes.
 
-### Core components
+### Core modules
 
 | Module | Responsibility |
 |---|---|
-| `pcap_reader.py` | Reads and writes classic PCAP records, including timestamps and captured packet bytes |
-| `packet_parser.py` | Parses Ethernet, VLAN, IPv4, IPv6, TCP, and UDP headers with bounds checks |
-| `sni_extractor.py` | Extracts available TLS SNI, HTTP Host, and DNS question-name metadata |
-| `connection_tracker.py` | Tracks directional flows, counters, TCP state observations, and stale-flow cleanup |
-| `rule_manager.py` | Manages filtering rules for IP addresses, applications, domains, and destination ports |
-| `fast_path.py` | Performs flow classification and rule evaluation |
+| `pcap_reader.py` | Reads and writes classic PCAP records, including timestamps and packet bytes |
+| `packet_parser.py` | Parses Ethernet, VLAN, IPv4, IPv6, TCP and UDP headers |
+| `sni_extractor.py` | Extracts available TLS SNI, HTTP Host and DNS question-name metadata |
+| `connection_tracker.py` | Tracks flows, counters, TCP state observations and stale entries |
+| `rule_manager.py` | Manages configurable traffic-filtering rules |
+| `fast_path.py` | Performs flow classification, rule evaluation and filtering decisions |
 | `load_balancer.py` | Routes flows using stable five-tuple affinity |
 | `thread_safe_queue.py` | Provides bounded queue operations for concurrent processing |
-| `dpi_mt.py` | Coordinates multithreaded packet processing |
-| `dpi_engine.py` | Integrates analysis, filtering, and reporting functionality |
-| `main.py` | Provides the command-line entry point |
+| `dpi_mt.py` | Supports multithreaded packet processing |
+| `dpi_engine.py` | Coordinates analysis, filtering and reporting |
+| `main.py` | Provides the command-line interface |
 
-## 3. Technical Features
+## 04. Technology Stack
 
-### Packet parsing
+- **Language:** Python 3.10+
+- **Packet format:** Classic PCAP
+- **Runtime dependencies:** Python standard library
+- **Testing:** Pytest
+- **Version control:** Git and GitHub
 
-The packet parser supports Ethernet II frames, common VLAN tags, IPv4, IPv6 with common extension headers, TCP, and UDP. Bounds checks help prevent malformed or truncated packets from being read beyond available data.
+The Python implementation does not require a C++ compiler or CMake configuration.
 
-The PCAP reader supports classic PCAP files with microsecond or nanosecond timestamps and both byte orders.
+## 05. Installation
 
-### Protocol metadata extraction
-
-The analyzer can extract selected metadata from:
-
-- **TLS:** Server Name Indication (SNI) from visible ClientHello messages.
-- **HTTP:** Host headers from available HTTP request data.
-- **DNS:** Question names from DNS messages.
-
-Metadata extraction is limited by the available packet data. Encryption, fragmentation, and incomplete captures can prevent hostname identification.
-
-### Flow tracking
-
-Flows are tracked using directional five-tuples:
-
-`Source IP + Source Port + Destination IP + Destination Port + Protocol`
-
-The connection tracker maintains packet and byte counters, observes TCP state transitions, cleans up stale entries, and supports bounded flow-table capacity.
-
-Reverse-direction packets are treated as separate flows in accordance with the existing implementation.
-
-### Rule-based filtering
-
-The analyzer supports rules based on:
-
-- Source IP address
-- Application classification
-- Exact or wildcard domain
-- Domain substring
-- Destination port
-
-Rules can be configured through the command-line interface or the Python API. A matched flow can remain blocked for subsequent packets, depending on the configured processing path.
-
-### Concurrent processing
-
-The multithreaded implementation uses bounded queues and configurable worker processing. Flow affinity helps route packets consistently, and the pipeline supports ordered output writing.
-
-Python threads preserve the processing architecture, but the Global Interpreter Lock can limit CPU-bound parsing performance. Native C++ implementations may offer higher throughput under comparable conditions.
-
-## 4. Installation
-
-### Requirements
+### Prerequisites
 
 - Python 3.10 or newer
-- Pytest for running the test suite
-- Git for cloning the repository
+- Git
+- Windows, Linux or macOS
 
-The runtime implementation uses Python's standard library.
-
-Clone the repository:
+### Clone the repository
 
 ```bash
 git clone https://github.com/Anshmhjn786/Deep-Packet-Analyser.git
 cd Deep-Packet-Analyser
 ```
 
-Create a virtual environment on Windows:
+### Create a virtual environment
+
+For Windows PowerShell:
 
 ```powershell
 py -m venv .venv
 .\.venv\Scripts\Activate.ps1
 ```
 
-Install the project and its test dependencies:
+For Linux or macOS:
 
-```powershell
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+```
+
+### Install the project
+
+```bash
 python -m pip install -e ".[test]"
 ```
 
-## 5. Usage
+This installs the package in editable mode with its optional test dependencies, as configured in `pyproject.toml`.
 
-### Inspect a capture
+## 06. Command-Line Usage
 
-Inspect up to ten packets from a sample PCAP:
-
-```powershell
-deep-packet-analyzer .\samples\test_dpi.pcap --max-packets 10
-```
-
-### Filter traffic
-
-Create a filtered output capture using application, source-IP, domain, and destination-port rules:
-
-```powershell
-deep-packet-analyzer .\samples\test_dpi.pcap .\samples\filtered_output.pcap --block-app YouTube --block-ip 192.168.1.50 --block-domain "*.example.com" --block-port 8443
-```
-
-Check the available command-line options:
+### Display available options
 
 ```powershell
 deep-packet-analyzer --help
 ```
 
-### Use the Python API
+Alternatively, run directly from the source tree:
+
+```powershell
+$env:PYTHONPATH = "src"
+python -m deep_packet_analyzer --help
+```
+
+### Inspect a packet capture
+
+Inspect up to ten packets from a sample capture:
+
+```powershell
+deep-packet-analyzer .\samples\test_dpi.pcap --max-packets 10
+```
+
+Inspection mode reports available packet and flow information without intentionally printing payload contents.
+
+### Filter network traffic
+
+Write permitted packets to a new PCAP file:
+
+```powershell
+deep-packet-analyzer .\samples\test_dpi.pcap .\samples\filtered_output.pcap --block-app YouTube --block-ip 192.168.1.50 --block-domain "*.example.com" --block-port 8443
+```
+
+This example demonstrates the intended CLI options. Exact behavior depends on the implemented filtering path and the metadata available in the capture.
+
+### Generate a test capture
+
+```powershell
+python .\scripts\generate_test_pcap.py .\samples\test_dpi.pcap
+```
+
+Review the generator before running it if you want to preserve an existing sample file.
+
+## 07. Rule Configuration
+
+The analyzer supports filtering by source IP, application, domain, domain substring, and destination port.
+
+Example rule file:
+
+```text
+[BLOCKED_IPS]
+192.168.1.50
+
+[BLOCKED_APPS]
+YouTube
+
+[BLOCKED_DOMAINS]
+*.example.com
+
+[BLOCKED_DOMAIN_SUBSTRINGS]
+facebook
+
+[BLOCKED_PORTS]
+8443
+```
+
+Rules can also be configured through the Python API.
 
 ```python
 from deep_packet_analyzer import DPIEngine, DPIEngineConfig
@@ -229,11 +250,28 @@ report = engine.process_file(
 print(report["packets"])
 ```
 
-The example assumes the package has been installed and the API matches the current source.
+The example assumes the installed package exposes these APIs and the report contains the referenced key.
 
-## 6. Testing and Validation
+## 08. Protocol Support
 
-Run the automated tests from the repository root:
+| Protocol or format | Supported behavior |
+|---|---|
+| Classic PCAP | Microsecond and nanosecond timestamps, both byte orders |
+| Ethernet II | Ethernet frame parsing |
+| VLAN | Common 802.1Q and 802.1ad tags |
+| IPv4 | Header parsing and address extraction |
+| IPv6 | Parsing with common extension headers |
+| TCP | Header parsing, flow tracking and state observations |
+| UDP | Header parsing and flow tracking |
+| TLS | SNI extraction from visible ClientHello messages |
+| HTTP | Host header extraction |
+| DNS | Question-name extraction |
+
+Application classification relies on implemented hostname signatures. It should not be treated as definitive identification of every application or encrypted connection.
+
+## 09. Testing and Validation
+
+Run the automated test suite from the project root:
 
 ```powershell
 python -m pytest -v
@@ -241,43 +279,65 @@ python -m pytest -v
 
 The test suite covers packet parsing, malformed frames, PCAP byte order and truncation, flow tracking, filtering rules, queue behavior, metadata extraction, and end-to-end filtering.
 
-Testing is important because malformed packet captures can contain incomplete headers, invalid lengths, and truncated records.
+Tests should be run against the current implementation before relying on particular features or performance claims.
 
-## 7. Design Decisions
+## 10. Design Considerations
 
-**Offline-first processing:** The analyzer works on existing capture files instead of opening live capture interfaces or transmitting packets.
+**Custom packet parsing:** The parser provides direct control over header validation and packet-byte handling.
 
-**Custom parsing:** A standard-library implementation provides direct control over packet boundaries, raw-frame handling, and protocol support.
+**Modular implementation:** Parsing, metadata extraction, flow tracking, rules and processing orchestration are separated into dedicated modules.
 
-**Modular architecture:** Parsing, metadata extraction, flow tracking, rules, concurrency, and orchestration are separated into individual modules.
+**Bounded resource usage:** Bounded queues and flow-table capacity help constrain resource consumption during processing.
 
-**Bounded processing:** Bounded queues and flow-table capacity help limit resource use during analysis.
+**Offline processing:** The tool analyzes existing capture files rather than performing live packet capture or network transmission.
 
-**Explicit limitations:** The implementation distinguishes supported protocol parsing from features that require stream reconstruction or cryptographic processing.
+**Concurrent execution:** The multithreaded implementation supports bounded worker queues and ordered output. CPU-bound Python code can remain limited by the CPython Global Interpreter Lock.
 
-## 8. Limitations
+## 11. Limitations
 
-The current implementation does not provide:
+The current documented implementation does not include:
 
 - Live packet capture or packet replay
 - TCP stream reassembly
-- Fragmented TLS ClientHello reconstruction
+- Reconstruction of fragmented TLS ClientHello messages
 - QUIC decryption or complete QUIC CRYPTO-frame reassembly
 - PCAP-NG parsing
+- IPv6 jumbogram support
 - Generic decoding of every network protocol
 - Machine-learning-based anomaly detection
 
-IPv6 jumbograms and non-Ethernet link types are also outside the documented support scope. Application classification depends on implemented hostname signatures and should not be treated as definitive identification of all traffic.
+Encrypted ClientHello, incomplete captures and fragmented protocol messages can prevent metadata extraction. Non-IP and non-TCP/UDP packets are not copied to the DPI output in the documented filtering path.
 
-## 9. Future Development
+## 12. Future Development
 
 Potential extensions include:
 
 - Machine-learning-based network anomaly detection
 - Supervised network traffic classification
-- Traffic statistics dashboards
+- Interactive traffic statistics dashboard
 - Exportable analysis reports
-- Benchmarking against representative datasets
+- Performance benchmarking on representative PCAP datasets
 - Additional protocol decoders and stream reconstruction
 
-These are
+These are proposed enhancements, not claims of implemented functionality.
+
+## 13. Security and Privacy
+
+Use only packet captures that you own or are authorized to inspect. Capture files may contain sensitive addresses, hostnames, application metadata or payload data.
+
+- Review sample captures before publishing them.
+- Do not commit credentials, private datasets or sensitive packet captures.
+- Keep payload inspection separate from unnecessary payload logging.
+- Use the analyzer only for authorized network analysis.
+
+## License
+
+See the [LICENSE](LICENSE) file for licensing terms.
+
+<div align="center">
+
+**Deep Packet Analyzer**
+
+*Built for network analysis, protocol inspection and cybersecurity research.*
+
+</div>
