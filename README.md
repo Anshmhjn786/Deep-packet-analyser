@@ -1,8 +1,39 @@
-<div align="center">
+ <div align="center">
 
-<img src="https://img.shields.io/badge/NETWORK-ANALYSIS-00B8D9?style=for-the-badge&labelColor=101820" alt="Network Analysis"/>
+<img src="https://img.shields.io/badge/DEEP%20PACKET%20ANALYZER-NETWORK%20INTELLIGENCE-00D9FF?style=for-the-badge&labelColor=07111F" alt="Deep Packet Analyzer Network Intelligence"/>
 
-# ⟡ DEEP PACKET ANALYZER
+<br/>
+
+# ⌬ DEEP PACKET ANALYZER
+
+### `PACKET IN. INSIGHT OUT.`
+
+**Offline Network Traffic Analysis · Deep Packet Inspection · Rule-Based Filtering**
+
+<br/>
+
+<img src="https://img.shields.io/badge/LANGUAGE-Python%203.10%2B-3776AB?style=flat-square&logo=python&logoColor=white" alt="Python 3.10+"/>
+<img src="https://img.shields.io/badge/INPUT-Classic%20PCAP-00B8A9?style=flat-square" alt="Classic PCAP"/>
+<img src="https://img.shields.io/badge/MODE-Offline%20Analysis-7C83FD?style=flat-square" alt="Offline Analysis"/>
+
+<br/><br/>
+
+```text
+   CAPTURE  ──►  DECODE  ──►  CLASSIFY  ──►  FILTER
+      │             │            │             │
+    PCAP         Protocols      Flows        Rules
+```
+
+</div>
+
+---
+
+## About the Project
+
+Deep Packet Analyzer is a modular Python application for inspecting Ethernet packet captures, parsing network protocols, tracking directional flows, extracting available application-layer metadata, and filtering traffic using configurable rules.
+
+It processes existing PCAP files without opening live capture interfaces or transmitting packets.
+
 
 **Inspect. Decode. Analyze.**
 
