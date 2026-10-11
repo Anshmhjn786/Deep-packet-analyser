@@ -1,3 +1,18 @@
+<div align="center">
+
+<img src="https://img.shields.io/badge/NETWORK-ANALYSIS-00B8D9?style=for-the-badge&labelColor=101820" alt="Network Analysis"/>
+
+# ⟡ DEEP PACKET ANALYZER
+
+**Inspect. Decode. Analyze.**
+
+A Python-based engine for offline packet inspection, network flow tracking, protocol metadata extraction, and rule-based traffic filtering.
+
+---
+
+`PYTHON` · `PCAP` · `DEEP PACKET INSPECTION` · `NETWORK SECURITY`
+
+</div>
 # Deep Packet Analyzer
 
 **Offline PCAP Analysis, Deep Packet Inspection, and Rule-Based Network Traffic Filtering**
