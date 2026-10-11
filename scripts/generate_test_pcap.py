@@ -6,6 +6,7 @@ Includes TLS Client Hello with SNI, HTTP, DNS, etc.
 
 import struct
 import random
+import argparse
 
 class PCAPWriter:
     def __init__(self, filename):
@@ -138,7 +139,15 @@ def create_dns_query(domain):
 
 
 def main():
-    writer = PCAPWriter('test_dpi.pcap')
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "output",
+        nargs="?",
+        default="test_dpi.pcap",
+        help="Output path (default: ./test_dpi.pcap)",
+    )
+    output_path = parser.parse_args().output
+    writer = PCAPWriter(output_path)
     
     # Source: User's machine
     user_mac = '00:11:22:33:44:55'
@@ -256,7 +265,7 @@ def main():
         seq_base += 1000
     
     writer.close()
-    print(f"Created test_dpi.pcap with test traffic")
+    print(f"Created {output_path} with test traffic")
     print(f"  - {len(tls_connections)} TLS connections with SNI")
     print(f"  - {len(http_connections)} HTTP connections")
     print(f"  - {len(dns_queries)} DNS queries")
